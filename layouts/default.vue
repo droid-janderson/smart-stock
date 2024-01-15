@@ -11,7 +11,6 @@
     }"
   >
     <v-navigation-drawer
-      v-model="drawer"
       v-if="title != 'index' && title != 'franquias'"
       :mini-variant="miniVariant"
       :clipped="clipped"
@@ -24,6 +23,7 @@
       <v-list-item dark>
         <v-list-item-content class="mt-2">
           <v-list-item-title class="text-h6 text-center">
+            <v-icon large class="mr-1">mdi-package-variant-closed</v-icon>
             Smart Stock
           </v-list-item-title>
         </v-list-item-content>
@@ -34,7 +34,7 @@
           <v-list-item
             v-for="(item, i) in items"
             :key="i"
-            :to="item.to"
+            :to="'/franquias/' + idFranchise + item.to"
             router
             exact
           >
@@ -56,12 +56,22 @@
       app
     >
       <v-toolbar-title
+        v-if="title === 'franquias'"
         class="text-capitalize"
         :style="{ color: darkTheme ? '#3FBC44' : '#022370' }"
-        >{{
-          title === "franquias" ? "Smart Stock" : "Franquia 1"
-        }}</v-toolbar-title
       >
+        <v-icon large color="primary" dark class="mr-1"
+          >mdi-package-variant-closed</v-icon
+        >
+        Smart Stock
+      </v-toolbar-title>
+      <v-toolbar-title
+        v-else
+        class="text-capitalize"
+        :style="{ color: darkTheme ? '#3FBC44' : '#022370' }"
+      >
+        {{ franchise ? franchise.name : "" }}
+      </v-toolbar-title>
       <v-spacer />
 
       <v-tooltip bottom :color="darkTheme ? 'secondary' : 'primary'">
@@ -78,29 +88,31 @@
         </template>
         <span>Mudar tema</span>
       </v-tooltip>
+      <v-btn icon @click="logoutUser">
+        <v-icon color="secondary">mdi-logout</v-icon>
+      </v-btn>
     </v-app-bar>
     <v-main>
-      <v-container>
-        <Nuxt />
-      </v-container>
+      <Nuxt />
     </v-main>
   </v-app>
 </template>
 
 <script>
+import { mapActions } from "vuex";
+
 export default {
   name: "DefaultLayout",
+  middleware: ["auth"],
   data() {
     return {
       clipped: false,
-      drawer: false,
       darkTheme: false,
-      fixed: false,
       items: [
         {
           icon: "mdi-view-dashboard",
           title: "Dashboard",
-          to: "/dashboard",
+          to: "/",
         },
         {
           icon: "mdi-cart",
@@ -134,17 +146,23 @@ export default {
         },
       ],
       miniVariant: false,
-      right: true,
-      rightDrawer: false,
     };
   },
   computed: {
     title() {
       return this.$route.name;
     },
+    idFranchise() {
+      return this.$store.state.franchises.idFranchise;
+    },
+    franchise() {
+      return this.$store.state.franchises.franchiseData;
+    },
   },
 
   methods: {
+    ...mapActions("auth", ["logout"]),
+
     toggleTheme(value) {
       if (value == false) {
         localStorage.removeItem("dark");
@@ -153,6 +171,12 @@ export default {
         localStorage.setItem("dark", "yes");
         this.$vuetify.theme.dark = true;
       }
+    },
+
+    async logoutUser() {
+      await this.logout();
+      this.$router.push("/");
+      console.log("User logout completed");
     },
   },
 };
