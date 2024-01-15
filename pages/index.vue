@@ -48,7 +48,7 @@
           ></v-text-field>
         </v-row>
         <v-row>
-          <v-btn dark block color="#3FBC44" @click="validate"> Login </v-btn>
+          <v-btn dark block color="#3FBC44" @click="isLogin"> Login </v-btn>
         </v-row>
         <v-row>
           <span class="mx-auto my-2 font-weight-medium" style="color: #3fbc44"
@@ -62,9 +62,9 @@
             outlined
             color="#F87D01"
             class="mr-4"
-            @click="validate"
+            @click="isGoogleLogin"
           >
-            Entrar com google
+            <v-icon class="mr-1">mdi-google</v-icon> Entrar com google
           </v-btn>
         </v-row>
         <v-row>
@@ -81,6 +81,8 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from "vuex";
+
 export default {
   data: () => ({
     valid: true,
@@ -98,11 +100,56 @@ export default {
     },
   }),
 
-  methods: {
-    validate() {
-      // this.$refs.form.validate();
+  computed: {
+    ...mapGetters("auth", ["isAuthenticated"]),
+  },
 
+  // eslint-disable-next-line require-await
+  async beforeMount() {
+    if (this.isAuthenticated) {
       this.$router.push("/franquias");
+    }
+  },
+
+  methods: {
+    ...mapActions("auth", ["login", "googleLogin"]),
+
+    async isLogin() {
+      try {
+        const validate = this.$refs.form.validate();
+        const user = {
+          email: this.email,
+          password: this.password,
+        };
+
+        if (validate) {
+          await this.login(user);
+
+          // this.$toast.success("Login Feito com sucesso!", {
+          //   position: "top-right",
+          //   timeout: 2000,
+          // });
+
+          this.$router.push("/franquias");
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Erro ao autenticar:", error.message);
+      }
+    },
+
+    async isGoogleLogin() {
+      try {
+        const provider = new this.$fireModule.auth.GoogleAuthProvider();
+        const credentials = await this.$fire.auth.signInWithPopup(provider);
+        console.log(credentials);
+
+        await this.googleLogin(credentials.user);
+
+        this.$router.push("/franquias");
+      } catch (error) {
+        console.error("Erro ao autenticar:", error.message);
+      }
     },
   },
 };
