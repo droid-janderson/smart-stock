@@ -7,7 +7,7 @@ export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: "%s",
-    title: "smart-stock",
+    title: "Smart Stock",
     htmlAttrs: {
       lang: "en",
     },
@@ -36,7 +36,36 @@ export default {
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
-  modules: [],
+  modules: [
+    // https://go.nuxtjs.dev/firebase
+    "@nuxtjs/firebase",
+  ],
+
+  router: {
+    middleware: ["auth", "franchise"],
+  },
+  // router: {
+  //   middleware: ["getFranquia"],
+  // },
+
+  firebase: {
+    config: {
+      apiKey: "AIzaSyCnJ9saZ2nNxPXtzJxA-WLR17ut2CI83Io",
+      authDomain: "smart-stock-tcc.firebaseapp.com",
+      projectId: "smart-stock-tcc",
+      storageBucket: "smart-stock-tcc.appspot.com",
+      messagingSenderId: "678182597674",
+      appId: "1:678182597674:web:a4bc9b093e708ad2bf3f53",
+    },
+
+    services: {
+      auth: {
+        persistence: "local",
+      },
+      firestore: true,
+      storage: true,
+    },
+  },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {

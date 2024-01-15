@@ -1,5 +1,12 @@
 # smart-stock
 
+### Login admin
+user: 
+admin@gmail.com
+
+password:
+@smartstock
+
 ## Build Setup
 
 ```bash
