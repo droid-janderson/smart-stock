@@ -3,11 +3,9 @@
     :style="{
       minHeight: '100vh',
       backgroundColor:
-        darkTheme && title !== 'index'
-          ? '#101729'
-          : !darkTheme && title !== 'index'
-          ? '#F8F9FD'
-          : '#101729',
+        title === 'index'
+          ? $vuetify.theme.themes.dark.background
+          : $vuetify.theme.currentTheme.background,
     }"
   >
     <v-navigation-drawer
@@ -22,10 +20,12 @@
     >
       <v-list-item dark>
         <v-list-item-content class="mt-2">
-          <v-list-item-title class="text-h6 text-center">
-            <v-icon large class="mr-1">mdi-package-variant-closed</v-icon>
-            Smart Stock
-          </v-list-item-title>
+          <div style="width: 28px">
+            <img
+              style="width: 100%"
+              src="../assets/img/Smart Stock Logo - white.png"
+            />
+          </div>
         </v-list-item-content>
       </v-list-item>
       <v-divider></v-divider>
@@ -55,26 +55,31 @@
       fixed
       app
     >
-      <v-toolbar-title
+      <div
         v-if="title === 'franquias'"
-        class="text-capitalize"
-        :style="{ color: darkTheme ? '#3FBC44' : '#022370' }"
+        style="width: 168px"
+        class="d-flex align-center"
       >
-        <v-icon large color="primary" dark class="mr-1"
-          >mdi-package-variant-closed</v-icon
-        >
-        Smart Stock
-      </v-toolbar-title>
+        <img
+          v-if="darkTheme"
+          style="width: 100%"
+          src="../assets/img/Smart Stock Logo - dark.png"
+        />
+        <img
+          v-else
+          style="width: 100%"
+          src="../assets/img/Smart Stock Logo - light.png"
+        />
+      </div>
       <v-toolbar-title
         v-else
-        class="text-capitalize"
-        :style="{ color: darkTheme ? '#3FBC44' : '#022370' }"
+        class="text-capitalize text-h5 font-weight-medium"
+        :style="{ color: $vuetify.theme.currentTheme.primary }"
       >
-        {{ franchise ? franchise.name : "" }}
+        {{ franchiseData ? franchiseData.name : "" }}
       </v-toolbar-title>
       <v-spacer />
-
-      <v-tooltip bottom :color="darkTheme ? 'secondary' : 'primary'">
+      <v-tooltip bottom color="backgroundNav">
         <template #activator="{ on }">
           <v-btn v-on="on" icon @click="toggleTheme((darkTheme = !darkTheme))">
             <v-icon :color="darkTheme ? 'secondary' : 'primary'">
@@ -88,18 +93,58 @@
         </template>
         <span>Mudar tema</span>
       </v-tooltip>
-      <v-btn icon @click="logoutUser">
-        <v-icon color="secondary">mdi-logout</v-icon>
-      </v-btn>
+      <v-menu rounded="10" bottom offset-y>
+        <template v-slot:activator="{ on: menu, attrs }">
+          <v-tooltip bottom color="backgroundNav">
+            <template v-slot:activator="{ on: tooltip }">
+              <v-btn
+                color="primary"
+                dark
+                v-bind="attrs"
+                v-on="{ ...tooltip, ...menu }"
+                icon
+              >
+                <v-icon>mdi-menu</v-icon>
+              </v-btn>
+            </template>
+            <span>Menu</span>
+          </v-tooltip>
+        </template>
+
+        <v-list dark rounded color="backgroundNav">
+          <v-list-item-group>
+            <v-list-item
+              v-for="(item, i) in itemsMenu"
+              :key="i"
+              id="menuItem"
+              inactive
+              @click="pushRoute(item)"
+            >
+              <v-list-item-action class="mr-1">
+                <v-icon>{{ item.icon }}</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>{{ item.title }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
+        </v-list>
+      </v-menu>
     </v-app-bar>
     <v-main>
-      <Nuxt />
+      <v-container style="max-width: 1200px">
+        <Nuxt />
+      </v-container>
     </v-main>
+
+    <v-overlay :value="loading" color="background">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
   </v-app>
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   name: "DefaultLayout",
@@ -108,6 +153,7 @@ export default {
     return {
       clipped: false,
       darkTheme: false,
+      loading: false,
       items: [
         {
           icon: "mdi-view-dashboard",
@@ -120,9 +166,9 @@ export default {
           to: "/produtos",
         },
         {
-          icon: "mdi-store",
-          title: "Franquias",
-          to: "/franquias",
+          icon: "mdi-basket",
+          title: "Realizar venda",
+          to: "/realizar-venda",
         },
         {
           icon: "mdi-chart-box",
@@ -130,33 +176,38 @@ export default {
           to: "/vendas",
         },
         {
-          icon: "mdi-shopping",
-          title: "Realizar venda",
-          to: "/realizar-venda",
-        },
-        {
-          icon: "mdi-cart-arrow-right",
+          icon: "mdi-cart-plus",
           title: "Entradas",
           to: "/entradas",
         },
         {
-          icon: "mdi-truck",
+          icon: "mdi-cart-arrow-right",
           title: "Saídas",
           to: "/saidas",
         },
       ],
+      itemsMenu: [
+        { icon: "mdi-store", title: "Minhas Franquias", path: "/franquias" },
+        { icon: "mdi-logout", title: "Sair" },
+      ],
       miniVariant: false,
     };
   },
+  watch: {
+    $nuxt: {
+      handler(val) {
+        this.loading = val.isFetching;
+      },
+      immediate: true,
+    },
+  },
   computed: {
+    ...mapGetters("franchises", ["franchiseData"]),
     title() {
       return this.$route.name;
     },
     idFranchise() {
       return this.$store.state.franchises.idFranchise;
-    },
-    franchise() {
-      return this.$store.state.franchises.franchiseData;
     },
   },
 
@@ -173,11 +224,24 @@ export default {
       }
     },
 
-    async logoutUser() {
-      await this.logout();
-      this.$router.push("/");
-      console.log("User logout completed");
+    async pushRoute(item) {
+      if (item.title.toLowerCase() === "sair") {
+        await this.logout();
+        this.$router.push("/");
+      } else {
+        this.$router.push(item.path);
+      }
     },
   },
 };
 </script>
+<style scoped>
+#menuItem {
+  cursor: pointer;
+  transition: background 0.5s ease-in-out;
+}
+
+#menuItem:hover {
+  background: #f8f9fd4d;
+}
+</style>
