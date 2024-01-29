@@ -7,17 +7,32 @@
       <img style="width: 100%" src="../assets/img/amico.svg" alt="" />
     </div>
     <div
-      class="d-flex flex-column align-center rounded-xl"
-      style="
-        width: 400px;
-        height: 440px;
-        background-color: #192340;
-        box-shadow: 0px 0px 4px 4px rgba(255, 255, 255, 0.25);
-      "
+      class="d-flex flex-column align-center justify-center rounded-xl"
+      :style="{
+        width: '400px',
+        height: '460px',
+        backgroundColor: $vuetify.theme.themes.dark.tertiary,
+        'box-shadow': '0px 0px 4px 4px rgba(255, 255, 255, 0.25)',
+      }"
     >
       <v-form style="width: 300px" ref="form" v-model="valid" lazy-validation>
         <v-row>
-          <h1 class="mt-9 mb-7 mx-auto" style="color: #3fbc44">Login</h1>
+          <div style="width: 180px">
+            <img
+              style="width: 100%"
+              src="../assets/img/Smart Stock Logo - white.png"
+            />
+          </div>
+        </v-row>
+        <v-row>
+          <h1
+            class="mb-7 mx-auto"
+            :style="{
+              color: $vuetify.theme.themes.dark.text_primary,
+            }"
+          >
+            Login
+          </h1>
         </v-row>
         <v-row>
           <v-text-field
@@ -25,7 +40,7 @@
             :rules="emailRules"
             label="E-mail"
             placeholder="exemplo@gmail.com"
-            background-color="#101729"
+            :background-color="$vuetify.theme.themes.dark.background"
             dark
             solo
             required
@@ -40,7 +55,7 @@
             hint="No mínimo 8 caracteres."
             label="Senha"
             placeholder="xxxxxxxx"
-            background-color="#101729"
+            :background-color="$vuetify.theme.themes.dark.background"
             dark
             solo
             required
@@ -48,10 +63,19 @@
           ></v-text-field>
         </v-row>
         <v-row>
-          <v-btn dark block color="#3FBC44" @click="isLogin"> Login </v-btn>
+          <v-btn
+            dark
+            block
+            :color="$vuetify.theme.themes.dark.primary"
+            @click="isLogin"
+          >
+            Login
+          </v-btn>
         </v-row>
         <v-row>
-          <span class="mx-auto my-2 font-weight-medium" style="color: #3fbc44"
+          <span
+            class="mx-auto my-2 font-weight-medium"
+            :style="{ color: $vuetify.theme.themes.dark.primary }"
             >OU</span
           >
         </v-row>
@@ -60,7 +84,7 @@
             dark
             block
             outlined
-            color="#F87D01"
+            :color="$vuetify.theme.themes.dark.secondary"
             class="mr-4"
             @click="isGoogleLogin"
           >
@@ -68,9 +92,18 @@
           </v-btn>
         </v-row>
         <v-row>
-          <span class="mt-2" style="font-size: 14px; color: #c1b9b9"
+          <span
+            class="mt-2"
+            :style="{
+              'font-size': '14px',
+              color: $vuetify.theme.themes.dark.text_tertiary,
+            }"
             >Não tem conta ainda?
-            <a style="color: #3fbc44; text-decoration: none" href=""
+            <a
+              :style="{
+                color: $vuetify.theme.themes.dark.primary,
+                'text-decoration': 'none',
+              }"
               >Cadastre-se</a
             ></span
           >
@@ -100,16 +133,15 @@ export default {
     },
   }),
 
-  computed: {
-    ...mapGetters("auth", ["isAuthenticated"]),
-  },
-
   // eslint-disable-next-line require-await
-  async beforeMount() {
-    if (this.isAuthenticated) {
-      this.$router.push("/franquias");
-    }
-  },
+  // async created() {
+  //   const isAuthenticated = this.$store.state.auth.isAuthenticated;
+  //   console.log(isAuthenticated);
+
+  //   if (isAuthenticated) {
+  //     this.$router.push("/franquias");
+  //   }
+  // },
 
   methods: {
     ...mapActions("auth", ["login", "googleLogin"]),
