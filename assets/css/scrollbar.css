@@ -1,0 +1,11 @@
+/* Estilize a barra de rolagem */
+::-webkit-scrollbar {
+  width: 7px; /* Largura da barra de rolagem */
+  background-color: var(--v-background-base);
+}
+
+/* Estilize o "rastreador" da barra de rolagem */
+::-webkit-scrollbar-thumb {
+  background-color: var(--v-primary-base); /* Cor do rastreador */
+  border-radius: 6px; /* Raio das bordas do rastreador */
+}
