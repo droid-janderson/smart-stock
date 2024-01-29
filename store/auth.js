@@ -1,6 +1,7 @@
 /* eslint-disable no-useless-catch */
 export const state = () => ({
   user: null,
+  isAuthenticated: false,
 });
 
 export const mutations = {
@@ -8,6 +9,9 @@ export const mutations = {
     state.user = payload;
 
     console.log("User", state.user);
+  },
+  setIsAuthenticated(state, payload) {
+    state.isAuthenticated = payload;
   },
 };
 
@@ -20,6 +24,7 @@ export const actions = {
       );
 
       commit("setUser", userCredential.user);
+      commit("setIsAuthenticated", true);
 
       localStorage.setItem("user", JSON.stringify(userCredential.user));
       return userCredential.user;
@@ -31,6 +36,7 @@ export const actions = {
   async googleLogin({ commit }, user) {
     try {
       commit("setUser", user);
+      commit("setIsAuthenticated", true);
 
       localStorage.setItem("user", JSON.stringify(user));
 
@@ -43,14 +49,11 @@ export const actions = {
   async logout({ commit }) {
     await this.$fire.auth.signOut();
     commit("setUser", null);
+    commit("setIsAuthenticated", false);
   },
 };
 
 export const getters = {
-  isAuthenticated: (state) => {
-    return !!state.user;
-  },
-  currentUser: (state) => {
-    return state.user;
-  },
+  isAuthenticated: (state) => state.user !== null,
+  currentUser: (state) => state.user,
 };

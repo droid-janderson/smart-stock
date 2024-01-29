@@ -3,6 +3,7 @@ export const state = () => ({
   franchises: null,
   idFranchise: null,
   franchiseData: null,
+  franchisesData: null,
 });
 
 export const mutations = {
@@ -13,12 +14,33 @@ export const mutations = {
   setFranchiseData(state, data) {
     state.franchiseData = data;
   },
+  setFranchisesData(state, data) {
+    state.franchisesData = data;
+  },
   setFranchises(state, payload) {
     state.franchises = payload;
   },
 };
 
 export const actions = {
+  async getFranchise({ commit, rootState }, id) {
+    try {
+      const db = this.$fire.firestore;
+      const franchiseRef = db
+        .collection("users")
+        .doc(rootState.auth.user.uid)
+        .collection("franchises")
+        .doc(id);
+
+      franchiseRef.onSnapshot((querySnapshot) => {
+        const data = querySnapshot.data();
+
+        commit("setFranchiseData", data);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  },
   async getFranchises({ commit, rootState }) {
     try {
       const db = this.$fire.firestore;
@@ -39,13 +61,14 @@ export const actions = {
       console.error("Error fetching plans:", error);
     }
   },
-  async saveFranchise({ rootState }, { name, description }) {
+  async saveFranchise({ rootState }, { name, cnpj, description }) {
     try {
       const db = this.$fire.firestore;
 
       const data = {
         id: "",
         name,
+        cnpj,
         description,
       };
 
@@ -69,5 +92,11 @@ export const actions = {
 export const getters = {
   franchisesData: (state) => {
     return state.franchises;
+  },
+  franchiseData: (state) => {
+    return state.franchiseData;
+  },
+  franchiseId: (state) => {
+    return state.idFranchise;
   },
 };
