@@ -6,12 +6,12 @@
         class="text-capitalize text-h6 font-weight-medium"
         :style="{ color: $vuetify.theme.currentTheme.primary }"
       >
-        <v-icon color="primary" dark class="mr-1">mdi-cart</v-icon>
-        Produtos
+        <v-icon color="primary" dark class="mr-1">mdi-cart-arrow-right</v-icon>
+        Saídas
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn color="primary" @click="dialog = true"
-        ><v-icon>mdi-plus</v-icon> Novo Produto</v-btn
+      <v-btn color="primary" @click="toPush"
+        ><v-icon class="mr-2">mdi-basket</v-icon> Realizar Venda</v-btn
       >
     </v-app-bar>
 
@@ -149,6 +149,38 @@
                       required
                     ></v-text-field>
                   </v-col>
+                  <!-- <v-col cols="6">
+                    <v-menu
+                      v-model="active"
+                      :close-on-content-click="false"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="260px"
+                    >
+                      <template v-slot:activator="{ on }">
+                        <v-text-field
+                          :disabled="!productPerishable.perishable"
+                          v-model="productPerishable.expirationDate"
+                          label="Data de vendimento"
+                          outlined
+                          readonly
+                          hide-details
+                          class="elevation-1"
+                          v-on="on"
+                          @click:append="active = true"
+                        >
+                          <template v-slot:append>
+                            <v-icon>mdi-calendar</v-icon>
+                          </template>
+                        </v-text-field>
+                      </template>
+                      <v-date-picker
+                        v-model="productPerishable.expirationDate"
+                        color="backgroundNav"
+                        @input="active = false"
+                      ></v-date-picker>
+                    </v-menu>
+                  </v-col> -->
                 </v-row>
               </v-container>
             </v-form>
@@ -209,6 +241,9 @@ export default {
           (v) => /.+@.+/.test(v) || "E-mail must be valid",
         ],
       },
+      productPerishable: {
+        expirationDate: null,
+      },
       product: {
         stockId: "",
         name: "",
@@ -226,6 +261,7 @@ export default {
 
   computed: {
     ...mapGetters("products", ["productsData"]),
+    ...mapGetters("franchises", ["franchiseId"]),
   },
 
   async created() {
@@ -251,6 +287,14 @@ export default {
         };
 
         this.dialog = false;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async toPush() {
+      try {
+        this.$router.push(`/franquias/${this.franchiseId}/realizar-venda`);
       } catch (error) {
         console.error(error);
       }
