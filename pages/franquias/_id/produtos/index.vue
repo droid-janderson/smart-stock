@@ -30,6 +30,7 @@
           <tr>
             <template v-for="item in headers">
               <th
+                v-if="item.value !== 'action'"
                 :key="item.text"
                 :style="{
                   backgroundColor: $vuetify.theme.currentTheme.tertiary,
@@ -39,12 +40,22 @@
               >
                 {{ item.text }}
               </th>
+              <th
+                v-else
+                :key="item.text"
+                :style="{
+                  backgroundColor: $vuetify.theme.currentTheme.tertiary,
+                  color: $vuetify.theme.currentTheme.text_tertiary,
+                }"
+                class="text-center"
+              >
+                <v-icon>{{ item.text }}</v-icon>
+              </th>
             </template>
           </tr>
         </thead>
         <tbody>
           <tr v-for="item in productsData" :key="item.name">
-            <td>{{ item.stockId }}</td>
             <td>{{ item.name }}</td>
             <td>{{ item.category }}</td>
             <td class="text-center">{{ item.unitPrice }}</td>
@@ -52,7 +63,18 @@
             <td>{{ item.unitType }}</td>
             <td class="text-center">{{ item.stockQuantity }}</td>
             <td class="text-center">{{ item.minimumQuantity }}</td>
-            <td class="text-center">{{ item.discontinued ? "Sim" : "Não" }}</td>
+            <td class="d-flex align-center justify-center">
+              <v-switch v-model="item.discontinued" inset></v-switch>
+            </td>
+            <td class="text-center">
+              <v-icon
+                color="secondary"
+                size="26"
+                style="cursor: pointer"
+                @click="removeProduct(item)"
+                >mdi-delete</v-icon
+              >
+            </td>
           </tr>
         </tbody>
       </template>
@@ -73,17 +95,6 @@
                 <v-row>
                   <v-col cols="6">
                     <v-text-field
-                      v-model="product.stockId"
-                      background-color="background"
-                      outlined
-                      label="ID de estoque"
-                      hide-details
-                      class="elevation-1"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="6">
-                    <v-text-field
                       v-model="product.name"
                       background-color="background"
                       outlined
@@ -93,8 +104,6 @@
                       required
                     ></v-text-field>
                   </v-col>
-                </v-row>
-                <v-row>
                   <v-col cols="6">
                     <v-text-field
                       v-model="product.category"
@@ -106,6 +115,8 @@
                       required
                     ></v-text-field>
                   </v-col>
+                </v-row>
+                <v-row align="center">
                   <v-col cols="6">
                     <v-select
                       :items="itemsSelect"
@@ -118,14 +129,14 @@
                       required
                     ></v-select>
                   </v-col>
-                </v-row>
-                <v-row>
-                  <v-col cols="5">
+                  <v-col cols="6">
                     <v-checkbox
                       v-model="product.perishable"
                       label="Produto perecível?"
                     ></v-checkbox>
                   </v-col>
+                </v-row>
+                <v-row>
                   <v-col cols="4">
                     <v-text-field
                       v-model="product.unitPrice"
@@ -138,7 +149,7 @@
                       required
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="3">
+                  <v-col cols="4">
                     <v-text-field
                       v-model="product.minimumQuantity"
                       background-color="background"
@@ -177,11 +188,6 @@ export default {
       active: false,
       headers: [
         {
-          text: "ID de estoque",
-          value: "stockId",
-          center: false,
-        },
-        {
           text: "Nome",
           value: "name",
           center: false,
@@ -193,6 +199,7 @@ export default {
         { text: "Quantidade", value: "stockQuantity", center: true },
         { text: "Quantidade Mínima", value: "minimumQuantity", center: true },
         { text: "Descontinuado?", value: "discontinued", center: true },
+        { text: "mdi-function", value: "action", center: true },
       ],
       itemsSelect: ["Unidade", "Quilogramas", "Litros", "Centímetro", "Caixa"],
       validate: {
@@ -210,7 +217,6 @@ export default {
         ],
       },
       product: {
-        stockId: "",
         name: "",
         category: "",
         unitPrice: "",
@@ -233,16 +239,15 @@ export default {
   },
 
   methods: {
-    ...mapActions("products", ["getProducts", "saveProduct"]),
+    ...mapActions("products", ["getProducts", "saveProduct", "deleteProduct"]),
     async addProduct() {
       try {
         await this.saveProduct(this.product);
         this.product = {
-          stockId: "",
           name: "",
           category: "",
           unitPrice: "",
-          stockValue: "",
+          stockValue: "R$ 0.00",
           unitType: "",
           perishable: false,
           stockQuantity: 0,
@@ -251,6 +256,14 @@ export default {
         };
 
         this.dialog = false;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async removeProduct(product) {
+      try {
+        await this.deleteProduct(product);
       } catch (error) {
         console.error(error);
       }

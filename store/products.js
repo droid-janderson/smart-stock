@@ -42,6 +42,8 @@ export const actions = {
       const franchiseId = rootState.franchises.idFranchise;
       const db = this.$fire.firestore;
 
+      payload.id = "";
+
       const product = await db
         .collection("users")
         .doc(rootState.auth.user.uid)
@@ -49,6 +51,30 @@ export const actions = {
         .doc(franchiseId)
         .collection("products")
         .add(payload);
+
+      await product.update({
+        id: product.id,
+      });
+
+      return product;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async deleteProduct({ rootState }, payload) {
+    try {
+      const franchiseId = rootState.franchises.idFranchise;
+      const db = this.$fire.firestore;
+
+      const product = await db
+        .collection("users")
+        .doc(rootState.auth.user.uid)
+        .collection("franchises")
+        .doc(franchiseId)
+        .collection("products")
+        .doc(payload.id)
+        .delete();
 
       return product;
     } catch (error) {
