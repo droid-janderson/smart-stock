@@ -51,7 +51,6 @@
             <td class="text-center">{{ item.stockValue }}</td>
             <td>{{ item.unitType }}</td>
             <td class="text-center">{{ item.stockQuantity }}</td>
-            <td class="text-center">{{ item.minimumQuantity }}</td>
             <td class="text-center">{{ item.discontinued ? "Sim" : "Não" }}</td>
           </tr>
         </tbody>
@@ -138,17 +137,6 @@
                       required
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="3">
-                    <v-text-field
-                      v-model="product.minimumQuantity"
-                      background-color="background"
-                      outlined
-                      label="Estoque mínimo"
-                      hide-details
-                      class="elevation-1"
-                      required
-                    ></v-text-field>
-                  </v-col>
                 </v-row>
               </v-container>
             </v-form>
@@ -191,7 +179,6 @@ export default {
         { text: "Valor do estoque", value: "stockValue", center: true },
         { text: "Unidade", value: "unitType", center: false },
         { text: "Quantidade", value: "stockQuantity", center: true },
-        { text: "Quantidade Mínima", value: "minimumQuantity", center: true },
         { text: "Descontinuado?", value: "discontinued", center: true },
       ],
       itemsSelect: ["Unidade", "Quilogramas", "Litros", "Centímetro", "Caixa"],
