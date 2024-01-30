@@ -1,7 +1,7 @@
 <!-- eslint-disable-next-line vue/no-v-html -->
 <template>
-  <v-container>
-    <v-app-bar color="tertiary" class="mb-2 font-weight-bold align-center">
+  <v-container class="pt-0">
+    <v-toolbar color="tertiary" class="mb-2 font-weight-bold align-center">
       <v-toolbar-title
         class="text-capitalize text-h6 font-weight-medium"
         :style="{ color: $vuetify.theme.currentTheme.primary }"
@@ -13,7 +13,7 @@
       <v-btn color="primary" @click="toPush"
         ><v-icon>mdi-plus</v-icon> Nova Entrada</v-btn
       >
-    </v-app-bar>
+    </v-toolbar>
 
     <!-- Simple table -->
     <v-simple-table

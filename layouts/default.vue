@@ -136,10 +136,6 @@
         <Nuxt />
       </v-container>
     </v-main>
-
-    <v-overlay :value="loading" color="background">
-      <v-progress-circular indeterminate size="64"></v-progress-circular>
-    </v-overlay>
   </v-app>
 </template>
 
@@ -153,7 +149,6 @@ export default {
     return {
       clipped: false,
       darkTheme: false,
-      loading: false,
       items: [
         {
           icon: "mdi-view-dashboard",

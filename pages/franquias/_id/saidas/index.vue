@@ -1,7 +1,7 @@
 <!-- eslint-disable-next-line vue/no-v-html -->
 <template>
-  <v-container>
-    <v-app-bar color="tertiary" class="mb-2 font-weight-bold align-center">
+  <v-container class="pt-0">
+    <v-toolbar color="tertiary" class="mb-2 font-weight-bold align-center">
       <v-toolbar-title
         class="text-capitalize text-h6 font-weight-medium"
         :style="{ color: $vuetify.theme.currentTheme.primary }"
@@ -11,9 +11,9 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn color="primary" @click="toPush"
-        ><v-icon class="mr-2">mdi-basket</v-icon> Realizar Venda</v-btn
+        ><v-icon class="mr-2">mdi-basket</v-icon> Nova Venda</v-btn
       >
-    </v-app-bar>
+    </v-toolbar>
 
     <!-- Simple table -->
     <v-simple-table

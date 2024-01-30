@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-8">
+  <div class="mt-4">
     <v-row>
       <h1
         :style="{
@@ -41,8 +41,12 @@
             style="cursor: pointer"
             @click="dialog = true"
           >
-            <v-icon large> mdi-plus </v-icon>
-            <v-card-subtitle class="text-center">Adicione uma franquia</v-card-subtitle>
+            <v-icon size="32" color="text_tertiary"> mdi-store-plus </v-icon>
+            <v-card-subtitle
+              :style="{ color: $vuetify.theme.currentTheme.text_tertiary }"
+              class="text-center text-uppercase font-weight-medium"
+              >Nova franquia</v-card-subtitle
+            >
           </v-card>
         </v-hover>
       </v-col>
@@ -84,7 +88,9 @@
 
     <v-row justify="center">
       <v-dialog v-model="dialog" persistent max-width="600px">
-        <v-card :style="{ backgroundColor: $vuetify.theme.currentTheme.tertiary }">
+        <v-card
+          :style="{ backgroundColor: $vuetify.theme.currentTheme.tertiary }"
+        >
           <v-card-title>
             <span class="text-h5">Cadastro Franquia</span>
           </v-card-title>
@@ -143,7 +149,9 @@
     <!-- Modal edit -->
     <v-row justify="center">
       <v-dialog v-model="dialogEdit" persistent max-width="600px">
-        <v-card :style="{ backgroundColor: $vuetify.theme.currentTheme.tertiary }">
+        <v-card
+          :style="{ backgroundColor: $vuetify.theme.currentTheme.tertiary }"
+        >
           <v-card-title>
             <span class="text-h5">Cadastro Franquia</span>
           </v-card-title>
@@ -231,7 +239,11 @@ export default {
 
   methods: {
     ...mapGetters("auth", ["isAuthenticated", "currentUser"]),
-    ...mapActions("franchises", ["getFranchises", "saveFranchise", "getFranchise"]),
+    ...mapActions("franchises", [
+      "getFranchises",
+      "saveFranchise",
+      "getFranchise",
+    ]),
     ...mapMutations("franchises", ["setIdFranchise"]),
 
     async addFranchise() {

@@ -1,15 +1,20 @@
 <!-- eslint-disable-next-line vue/no-v-html -->
 <template>
-  <v-container>
-    <v-card width="100%" color="tertiary" elevation="2" class="my-2">
-      <v-row justify="space-between">
-        <v-card-title class="ml-2"> Nova entrada de produto </v-card-title>
-        <v-card-actions class="mr-4">
-          <v-btn color="primary" @click="addProduct"
-            ><v-icon>mdi-plus</v-icon> Adicionar</v-btn
-          >
-        </v-card-actions>
-      </v-row>
+  <v-container class="pt-0">
+    <v-toolbar class="mb-1" color="tertiary">
+      <v-toolbar-title
+        class="text-capitalize text-h6 font-weight-medium"
+        :style="{ color: $vuetify.theme.currentTheme.primary }"
+      >
+        <v-icon color="primary" dark class="mr-1">mdi-cart-plus</v-icon>
+        Nova entrada
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn color="primary" @click="addProduct"
+        >Lançar produtos<v-icon class="ml-1">mdi-rocket</v-icon></v-btn
+      >
+    </v-toolbar>
+    <v-card width="100%" color="tertiary" elevation="2" class="mb-2">
       <v-form v-model="validate.valid">
         <v-container>
           <v-row>
@@ -75,6 +80,12 @@
                 required
               ></v-text-field>
             </v-col>
+            <v-spacer></v-spacer>
+            <v-card-actions class="mr-4">
+              <v-btn color="secondary" @click="addProduct"
+                ><v-icon>mdi-plus</v-icon> Adicionar</v-btn
+              >
+            </v-card-actions>
           </v-row>
         </v-container>
       </v-form>
@@ -83,7 +94,7 @@
     <!-- Simple table -->
     <v-simple-table
       fixed-header
-      height="65vh"
+      height="64vh"
       :style="{
         backgroundColor: $vuetify.theme.currentTheme.tertiary,
         color: $vuetify.theme.currentTheme.text_primary,

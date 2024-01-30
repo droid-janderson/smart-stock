@@ -1,7 +1,7 @@
 <template>
-  <v-container
-    style="height: 100vh"
-    class="d-flex align-center justify-space-around"
+  <div
+    class="d-flex align-center justify-space-around mt-4"
+    style="min-height: 90vh"
   >
     <div style="width: 460px">
       <img style="width: 100%" src="../assets/img/amico.svg" alt="" />
@@ -110,7 +110,7 @@
         </v-row>
       </v-form>
     </div>
-  </v-container>
+  </div>
 </template>
 
 <script>
