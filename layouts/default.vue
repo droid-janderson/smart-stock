@@ -18,9 +18,9 @@
       permanent
       app
     >
-      <v-list-item dark>
+      <v-list-item>
         <v-list-item-content class="mt-2">
-          <div style="width: 28px">
+          <div style="width: 24px">
             <img
               style="width: 100%"
               src="../assets/img/Smart Stock Logo - white.png"
@@ -161,6 +161,11 @@ export default {
           to: "/produtos",
         },
         {
+          icon: "mdi-cart-plus",
+          title: "Entradas",
+          to: "/entradas",
+        },
+        {
           icon: "mdi-basket",
           title: "Realizar venda",
           to: "/realizar-venda",
@@ -170,11 +175,7 @@ export default {
           title: "Vendas",
           to: "/vendas",
         },
-        {
-          icon: "mdi-cart-plus",
-          title: "Entradas",
-          to: "/entradas",
-        },
+
         {
           icon: "mdi-cart-arrow-right",
           title: "Saídas",
