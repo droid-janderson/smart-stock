@@ -129,9 +129,8 @@
             </v-list-item>
           </v-list-item-group>
         </v-list>
-      </v-menu>
-    </v-app-bar>
-    <v-main>
+      </v-menu> </v-app-bar
+    ><v-main>
       <v-container style="max-width: 1200px">
         <Nuxt />
       </v-container>
@@ -149,12 +148,13 @@ export default {
     return {
       clipped: false,
       darkTheme: false,
+
       items: [
-        {
-          icon: "mdi-view-dashboard",
-          title: "Dashboard",
-          to: "/",
-        },
+        // {
+        //   icon: "mdi-view-dashboard",
+        //   title: "Dashboard",
+        //   to: "/",
+        // },
         {
           icon: "mdi-cart",
           title: "Produtos",
@@ -188,14 +188,6 @@ export default {
       ],
       miniVariant: false,
     };
-  },
-  watch: {
-    $nuxt: {
-      handler(val) {
-        this.loading = val.isFetching;
-      },
-      immediate: true,
-    },
   },
   computed: {
     ...mapGetters("franchises", ["franchiseData"]),
