@@ -62,6 +62,33 @@ export const actions = {
     }
   },
 
+  async updatedProducts({ rootState }, payload) {
+    const franchiseId = rootState.franchises.idFranchise;
+    const db = this.$fire.firestore;
+
+    try {
+      const batch = db.batch();
+
+      // Update the products in the batch
+      for (const product of payload) {
+        const productRef = db
+          .collection("users")
+          .doc(rootState.auth.user.uid)
+          .collection("franchises")
+          .doc(franchiseId)
+          .collection("products")
+          .doc(product.id);
+
+        batch.update(productRef, product);
+      }
+
+      await batch.commit();
+    } catch (error) {
+      console.error("Error updating products in Firebase:", error);
+      this.$toast.error("Failed to update products in Firebase.");
+    }
+  },
+
   async deleteProduct({ rootState }, payload) {
     try {
       const franchiseId = rootState.franchises.idFranchise;

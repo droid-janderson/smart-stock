@@ -87,6 +87,21 @@ export const actions = {
       throw error;
     }
   },
+
+  async deleteFranchise({ rootState }, payload) {
+    try {
+      const db = this.$fire.firestore;
+
+      await db
+        .collection("users")
+        .doc(rootState.auth.user.uid)
+        .collection("franchises")
+        .doc(payload.id)
+        .delete();
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export const getters = {

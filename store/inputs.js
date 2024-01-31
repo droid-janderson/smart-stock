@@ -1,64 +1,65 @@
 /* eslint-disable no-useless-catch */
 export const state = () => ({
-  products: null,
-  productData: null,
+  inputs: null,
+  inputData: null,
 });
 
 export const mutations = {
-  setProductData(state, data) {
-    state.productData = data;
-  },
-  setProducts(state, payload) {
-    state.products = payload;
+  setInputs(state, payload) {
+    state.inputs = payload;
   },
 };
 
 export const actions = {
-  async getProducts({ commit, rootState }) {
+  async getInputs({ commit, rootState }) {
     try {
       const franchiseId = rootState.franchises.idFranchise;
       const db = this.$fire.firestore;
-      const franchiseRef = db
+      const inputRef = db
         .collection("users")
         .doc(rootState.auth.user.uid)
         .collection("franchises")
         .doc(franchiseId)
-        .collection("products");
+        .collection("inputs");
 
-      franchiseRef.onSnapshot((querySnapshot) => {
+      inputRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
-        commit("setProducts", data);
+        console.log(data);
+
+        commit("setInputs", data);
       });
     } catch (error) {
       console.error("Error fetching plans:", error);
     }
   },
-  async saveProduct({ rootState }, payload) {
+
+  async saveInputs({ rootState }, payload) {
+    const franchiseId = rootState.franchises.idFranchise;
+    const db = this.$fire.firestore;
+
     try {
-      const franchiseId = rootState.franchises.idFranchise;
-      const db = this.$fire.firestore;
-
-      const product = await db
-        .collection("users")
-        .doc(rootState.auth.user.uid)
-        .collection("franchises")
-        .doc(franchiseId)
-        .collection("products")
-        .add(payload);
-
-      return product;
+      for (const product of payload) {
+        await db
+          .collection("users")
+          .doc(rootState.auth.user.uid)
+          .collection("franchises")
+          .doc(franchiseId)
+          .collection("inputs")
+          .add(product);
+      }
     } catch (error) {
-      throw error;
+      console.error("Error sending products to Firebase:", error);
+      this.$toast.error("Failed to send products to Firebase.");
     }
   },
 };
 
 export const getters = {
-  productsData: (state) => {
-    return state.products;
+  inputsData: (state) => {
+    return state.inputs;
   },
 };

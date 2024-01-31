@@ -33,6 +33,20 @@ export const actions = {
     }
   },
 
+  async register({ commit }, { nome, email, password }) {
+    try {
+      const userCredential =
+        await this.$fire.auth.createUserWithEmailAndPassword(email, password);
+
+      await db.collection("users").add(userCredential.user.uid);
+
+      console.log(userCredential.user.uid);
+      return userCredential.user;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   async googleLogin({ commit }, user) {
     try {
       commit("setUser", user);

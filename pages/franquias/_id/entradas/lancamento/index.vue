@@ -3,17 +3,19 @@
   <v-container class="pt-0">
     <v-toolbar class="mb-1" color="tertiary">
       <v-toolbar-title
-        class="text-capitalize text-h6 font-weight-medium"
+        class="text-h6 font-weight-medium d-flex align-center"
         :style="{ color: $vuetify.theme.currentTheme.primary }"
       >
         <v-icon color="primary" dark class="mr-1">mdi-cart-plus</v-icon>
         Nova entrada
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn color="primary" @click="addProduct"
+      <v-btn :loading="loading" color="primary" @click="save"
         >Lançar produtos<v-icon class="ml-1">mdi-rocket</v-icon></v-btn
       >
     </v-toolbar>
+
+    <!-- Card para add produtos na tabela -->
     <v-card width="100%" color="tertiary" elevation="2" class="mb-2">
       <v-form v-model="validate.valid">
         <v-container>
@@ -34,7 +36,7 @@
                 required
               ></v-autocomplete>
             </v-col>
-            <v-col v-if="product?.perishable" cols="3">
+            <v-col v-if="product?.perishable" cols="2">
               <v-menu
                 v-model="active"
                 :close-on-content-click="false"
@@ -45,7 +47,7 @@
                 <template v-slot:activator="{ on }">
                   <v-text-field
                     v-model="productPerishable.expirationDate"
-                    label="Data de vencimento"
+                    label="Vencimento"
                     dense
                     outlined
                     readonly
@@ -68,15 +70,16 @@
                 ></v-date-picker>
               </v-menu>
             </v-col>
-            <v-col cols="2">
+            <v-col v-if="product" cols="2">
               <v-text-field
                 v-model="productDTO.stockQuantity"
                 background-color="background"
                 outlined
                 dense
                 label="Quantidade"
-                hide-details
-                class="elevation-1"
+                hide-details="auto"
+                :hint="`Produtos em estoque: ${product.stockQuantity}`"
+                type="number"
                 required
               ></v-text-field>
             </v-col>
@@ -132,7 +135,6 @@
         </thead>
         <tbody>
           <tr v-for="item in productsInput" :key="item.name">
-            <td>{{ item.stockId }}</td>
             <td>{{ item.name }}</td>
             <td>{{ item.category }}</td>
             <td class="text-center">{{ item.unitPrice }}</td>
@@ -163,12 +165,8 @@ export default {
     return {
       dialog: false,
       active: false,
+      loading: false,
       headers: [
-        {
-          text: "ID de estoque",
-          value: "stockId",
-          center: false,
-        },
         {
           text: "Nome",
           value: "name",
@@ -176,12 +174,11 @@ export default {
         },
         { text: "Categoria", value: "category", center: false },
         { text: "Preço unitário", value: "unitPrice", center: true },
-        { text: "Valor do estoque", value: "stockValue", center: true },
+        { text: "Valor total", value: "stockValue", center: true },
         { text: "Unidade", value: "unitType", center: false },
         { text: "Quantidade", value: "stockQuantity", center: true },
         { text: "mdi-function", value: "action", center: true },
       ],
-      itemsSelect: ["Unidade", "Quilogramas", "Litros", "Centímetro", "Caixa"],
       validate: {
         valid: false,
         firstname: "",
@@ -209,6 +206,7 @@ export default {
 
   computed: {
     ...mapGetters("products", ["productsData"]),
+    ...mapGetters("franchises", ["franchiseId"]),
     productsInput() {
       return this.products;
     },
@@ -219,15 +217,63 @@ export default {
   },
 
   methods: {
-    ...mapActions("products", ["getProducts", "saveProduct"]),
-    async addProduct() {
-      const { stockQuantity } = this.productDTO;
+    ...mapActions("products", ["getProducts", "updatedProducts"]),
+    ...mapActions("inputs", ["saveInputs"]),
+    async save() {
+      if (this.products.length > 0) {
+        this.loading = true;
 
-      this.product.stockQuantity = stockQuantity;
+        setTimeout(() => (this.loading = false), 2000);
 
-      this.products.push(this.product);
+        this.updateProductsData();
 
-      console.log(this.products);
+        await this.updatedProducts(this.productsData);
+        await this.saveInputs(this.products);
+
+        this.$toast.success("Produtos adicionados com sucesso!", {
+          position: "top-right",
+          timeout: 2000,
+        });
+        this.$router.push(`/franquias/${this.franchiseId}/entradas`);
+      } else {
+        this.$toast.error("Adicione produtos!");
+      }
+    },
+
+    addProduct() {
+      if (this.product && this.productDTO.stockQuantity > 0) {
+        const { stockQuantity } = this.productDTO;
+        this.product.stockValue = `R$ ${(
+          stockQuantity * parseFloat(this.product.unitPrice.replace("R$", ""))
+        ).toFixed(2)}`;
+
+        if (this.isProductExist(this.product)) {
+          this.$toast.error("Produto já adicionado!");
+          return;
+        }
+
+        this.product.stockQuantity = stockQuantity;
+
+        this.products.push(this.product);
+        this.product = null;
+        this.productDTO.stockQuantity = 0;
+      } else {
+        this.$toast.error("Preencha todos os campos!");
+      }
+    },
+
+    isProductExist(product) {
+      return this.products.some((p) => p.name === product.name);
+    },
+
+    updateProductsData() {
+      this.productsData.forEach((productData) => {
+        const product = this.products.find((p) => p.name === productData.name);
+        if (product) {
+          productData.stockQuantity = product.stockQuantity;
+          productData.stockValue = product.stockValue;
+        }
+      });
     },
 
     removeProduct(item) {
@@ -237,28 +283,6 @@ export default {
         this.products.splice(indice, 1);
       }
     },
-
-    // async addProduct() {
-    //   try {
-    //     await this.saveProduct(this.product);
-    //     this.product = {
-    //       stockId: "",
-    //       name: "",
-    //       category: "",
-    //       unitPrice: "",
-    //       stockValue: "",
-    //       unitType: "",
-    //       perishable: false,
-    //       stockQuantity: 0,
-    //       minimumQuantity: 0,
-    //       discontinued: false,
-    //     };
-
-    //     this.dialog = false;
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // },
   },
 };
 </script>
