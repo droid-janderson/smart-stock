@@ -223,6 +223,10 @@ export default {
     async pushRoute(item) {
       if (item.title.toLowerCase() === "sair") {
         await this.logout();
+        this.$toast.error("Usuário deslogado!", {
+          position: "top-right",
+          timeout: 2000,
+        });
         this.$router.push("/");
       } else {
         this.$router.push(item.path);

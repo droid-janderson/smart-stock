@@ -30,7 +30,7 @@ export default {
   css: ["~/assets/css/scrollbar.css"],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: ["~/plugins/toast.js"],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -45,6 +45,15 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/firebase
     "@nuxtjs/firebase",
+    // Toast plugin
+    "vue-toastification/nuxt",
+    [
+      "vue-toastification/nuxt",
+      {
+        timeout: 1000,
+        draggable: false,
+      },
+    ],
   ],
 
   router: {
@@ -84,6 +93,7 @@ export default {
         light: {
           background: "#F8F9FD",
           backgroundNav: "#022370",
+          snackbar: "#022370",
           primary: "#022370",
           secondary: "#FF5252",
           tertiary: "#F8F9FD",
@@ -95,6 +105,7 @@ export default {
         dark: {
           background: "#101729",
           backgroundNav: "#192340",
+          snackbar: "#101729",
           primary: "#3FBC44",
           secondary: "#F87D01",
           tertiary: "#192340",
@@ -104,6 +115,32 @@ export default {
           hover: "#233460",
         },
       },
+    },
+  },
+
+  toast: {
+    position: "top-center",
+    timeout: 3000,
+    closeOnClick: true,
+    pauseOnFocusLoss: true,
+    pauseOnHover: true,
+    draggable: true,
+    draggablePercent: 0.6,
+    showCloseButtonOnHover: true,
+    hideProgressBar: false,
+    closeButton: "button",
+    icon: true,
+    rtl: false,
+    transition: "Vue-Toastification__fade",
+    maxToasts: 1,
+    newestOnTop: false,
+    filterBeforeCreate: (toast, toasts) => {
+      if (toasts.filter((t) => t.type === toast.type).length !== 0) {
+        // Returning false discards the toast
+        return false;
+      }
+      // You can modify the toast if you want
+      return toast;
     },
   },
 
