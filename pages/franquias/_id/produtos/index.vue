@@ -3,11 +3,11 @@
   <v-container class="pt-0">
     <v-toolbar color="tertiary" class="mb-2 font-weight-bold align-center">
       <v-toolbar-title
-        class="text-capitalize text-h6 font-weight-medium"
+        class="text-h6 font-weight-medium d-flex align-center"
         :style="{ color: $vuetify.theme.currentTheme.primary }"
       >
         <v-icon color="primary" dark class="mr-1">mdi-cart</v-icon>
-        Produtos
+        Cadastro de produtos
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn color="primary" @click="dialog = true"
@@ -62,7 +62,6 @@
             <td class="text-center">{{ item.stockValue }}</td>
             <td>{{ item.unitType }}</td>
             <td class="text-center">{{ item.stockQuantity }}</td>
-            <td class="text-center">{{ item.minimumQuantity }}</td>
             <td class="d-flex align-center justify-center">
               <v-switch v-model="item.discontinued" inset></v-switch>
             </td>
@@ -71,7 +70,7 @@
                 color="secondary"
                 size="26"
                 style="cursor: pointer"
-                @click="removeProduct(item)"
+                @click="openSnackbar(item)"
                 >mdi-delete</v-icon
               >
             </td>
@@ -144,17 +143,7 @@
                       outlined
                       label="Preço unitário"
                       prefix="R$"
-                      hide-details
-                      class="elevation-1"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field
-                      v-model="product.minimumQuantity"
-                      background-color="background"
-                      outlined
-                      label="Estoque mínimo"
+                      directives="currency"
                       hide-details
                       class="elevation-1"
                       required
@@ -166,15 +155,72 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="secondary" text @click="dialog = false">
+            <v-btn color="secondary" outlined rounded @click="dialog = false">
               <v-icon>mdi-close</v-icon>
               Fechar
             </v-btn>
-            <v-btn color="primary" text @click="addProduct"> Salvar </v-btn>
+            <v-btn
+              class="d-flex align-center mb-1"
+              color="primary"
+              outlined
+              rounded
+              @click="addProduct"
+            >
+              <v-icon class="mr-1">mdi-content-save-outline</v-icon>
+              Salvar
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </v-row>
+
+    <!-- remove product -->
+    <div class="text-center">
+      <v-snackbar
+        v-model="snackbar"
+        :vertical="vertical"
+        width="360"
+        height="180"
+        transition="scale-transition"
+        centered
+        color="snackbar"
+        shaped
+        prominent
+      >
+        <div
+          class="d-flex align-center pb-3 font-weight-medium text-subtitle-1"
+        >
+          <v-icon color="secondary" class="mr-3" x-large
+            >mdi-alert-circle-outline</v-icon
+          >
+          Deseja remover este produto?
+        </div>
+
+        <span>Atenção! Essa ação não pode ser desfeita.</span>
+
+        <template #action="{ attrs }">
+          <v-btn
+            class="mb-3 mr-3"
+            outlined
+            rounded
+            v-bind="attrs"
+            @click="removeProduct"
+          >
+            Sim
+          </v-btn>
+          <v-btn
+            class="mb-3 mr-3"
+            color="secondary"
+            outlined
+            rounded
+            v-bind="attrs"
+            @click="snackbar = false"
+          >
+            Não
+          </v-btn>
+        </template>
+      </v-snackbar>
+    </div>
   </v-container>
 </template>
 
@@ -186,6 +232,8 @@ export default {
     return {
       dialog: false,
       active: false,
+      snackbar: false,
+      vertical: true,
       headers: [
         {
           text: "Nome",
@@ -200,7 +248,7 @@ export default {
         { text: "Descontinuado?", value: "discontinued", center: true },
         { text: "mdi-function", value: "action", center: true },
       ],
-      itemsSelect: ["Unidade", "Quilogramas", "Litros", "Centímetro", "Caixa"],
+      itemsSelect: ["Unidade", "Quilograma", "Litro", "Centímetro", "Caixa"],
       validate: {
         valid: false,
         firstname: "",
@@ -223,9 +271,10 @@ export default {
         unitType: "",
         perishable: false,
         stockQuantity: 0,
-        minimumQuantity: 0,
         discontinued: false,
       },
+
+      itemSnackbar: null,
     };
   },
 
@@ -241,6 +290,8 @@ export default {
     ...mapActions("products", ["getProducts", "saveProduct", "deleteProduct"]),
     async addProduct() {
       try {
+        this.product.unitType = this.product.unitType.toLowerCase();
+        this.product.unitPrice = `R$ ${this.product.unitPrice}`;
         await this.saveProduct(this.product);
         this.product = {
           name: "",
@@ -250,19 +301,33 @@ export default {
           unitType: "",
           perishable: false,
           stockQuantity: 0,
-          minimumQuantity: 0,
           discontinued: false,
         };
 
         this.dialog = false;
+        this.$toast.success("Produto adicionado com sucesso!", {
+          position: "top-right",
+          timeout: 2000,
+        });
       } catch (error) {
         console.error(error);
       }
     },
 
-    async removeProduct(product) {
+    openSnackbar(product) {
+      this.snackbar = true;
+      this.itemSnackbar = product;
+    },
+
+    async removeProduct() {
       try {
-        await this.deleteProduct(product);
+        await this.deleteProduct(this.itemSnackbar);
+
+        this.snackbar = false;
+        this.$toast.success("Produto removido com sucesso!", {
+          position: "top-right",
+          timeout: 2000,
+        });
       } catch (error) {
         console.error(error);
       }

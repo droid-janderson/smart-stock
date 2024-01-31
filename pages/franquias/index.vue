@@ -58,12 +58,12 @@
             absolute
             elevation="2"
             fab
-            color="primary"
-            top
+            color="secondary"
+            bottom
             right
-            class="mt-4 mr-4"
-            @click="editFranchise(item.id)"
-            ><v-icon size="24">mdi-pen</v-icon></v-btn
+            class="mr-4 mb-4"
+            @click="openSnackbar(item)"
+            ><v-icon size="24">mdi-delete</v-icon></v-btn
           >
 
           <v-hover v-slot="{ hover }" open-delay="300" close-delay="200">
@@ -136,77 +136,78 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="secondary" text @click="dialog = false">
+            <v-btn
+              class="mb-1"
+              color="secondary"
+              outlined
+              rounded
+              @click="dialog = false"
+            >
               <v-icon>mdi-close</v-icon>
               Fechar
             </v-btn>
-            <v-btn color="primary" text @click="addFranchise"> Salvar </v-btn>
+            <v-btn
+              class="d-flex align-center mb-1"
+              color="primary"
+              outlined
+              rounded
+              @click="addFranchise"
+            >
+              <v-icon class="mr-1">mdi-content-save-outline</v-icon>
+              Salvar
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </v-row>
 
-    <!-- Modal edit -->
-    <v-row justify="center">
-      <v-dialog v-model="dialogEdit" persistent max-width="600px">
-        <v-card
-          :style="{ backgroundColor: $vuetify.theme.currentTheme.tertiary }"
+    <!-- remove franchise -->
+    <div class="text-center">
+      <v-snackbar
+        v-model="snackbar"
+        :vertical="vertical"
+        width="360"
+        height="180"
+        transition="scale-transition"
+        centered
+        color="snackbar"
+        shaped
+        prominent
+      >
+        <div
+          class="d-flex align-center pb-3 font-weight-medium text-subtitle-1"
         >
-          <v-card-title>
-            <span class="text-h5">Cadastro Franquia</span>
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="franchiseDTO.name"
-                    background-color="background"
-                    solo
-                    label="Nome"
-                    hide-details
-                    required
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="franchiseDTO.cnpj"
-                    background-color="background"
-                    solo
-                    label="CNPJ"
-                    hide-details
-                    required
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12">
-                  <v-textarea
-                    v-model="franchiseDTO.description"
-                    background-color="background"
-                    solo
-                    no-resize
-                    name="input-7-4"
-                    hide-details
-                    label="Descrição"
-                  ></v-textarea>
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="secondary" text @click="closeEdit">
-              <v-icon>mdi-close</v-icon>
-              Cancelar
-            </v-btn>
-            <v-btn color="primary" text @click="saveFranchise"> Salvar </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-row>
+          <v-icon color="secondary" class="mr-3" x-large
+            >mdi-alert-circle-outline</v-icon
+          >
+          Deseja remover este produto?
+        </div>
+
+        <span>Atenção! Essa ação não pode ser desfeita.</span>
+
+        <template #action="{ attrs }">
+          <v-btn
+            class="mb-3 mr-3"
+            outlined
+            rounded
+            v-bind="attrs"
+            @click="removeFranchise"
+          >
+            Sim
+          </v-btn>
+          <v-btn
+            class="mb-3 mr-3"
+            color="secondary"
+            outlined
+            rounded
+            v-bind="attrs"
+            @click="snackbar = false"
+          >
+            Não
+          </v-btn>
+        </template>
+      </v-snackbar>
+    </div>
   </div>
 </template>
 
@@ -218,12 +219,15 @@ export default {
   data() {
     return {
       dialog: false,
-      dialogEdit: false,
+      snackbar: false,
+      vertical: true,
       franchiseDTO: {
         name: "",
         description: "",
         cnpj: "",
       },
+
+      itemSnackbar: null,
     };
   },
   computed: {
@@ -243,12 +247,20 @@ export default {
       "getFranchises",
       "saveFranchise",
       "getFranchise",
+      "deleteFranchise",
     ]),
     ...mapMutations("franchises", ["setIdFranchise"]),
 
     async addFranchise() {
+      const { name, description, cnpj } = this.franchiseDTO;
       try {
-        const { name, description, cnpj } = this.franchiseDTO;
+        if (!name || !description || !cnpj) {
+          this.$toast.error("Preencha todos os campos!", {
+            position: "top-right",
+            timeout: 2000,
+          });
+          return;
+        }
 
         await this.saveFranchise({ name, description, cnpj });
 
@@ -263,33 +275,24 @@ export default {
         console.error("Erro ao salvar os dados:", error);
       }
     },
-    async editFranchise(id) {
+
+    openSnackbar(product) {
+      this.snackbar = true;
+      this.itemSnackbar = product;
+    },
+
+    async removeFranchise() {
       try {
-        await this.getFranchise(id);
+        await this.deleteFranchise(this.itemSnackbar);
 
-        const { name, cnpj, description } = this.franchiseData;
-        console.log(this.franchiseData);
-
-        this.franchiseDTO = {
-          name,
-          cnpj,
-          description,
-        };
-
-        this.dialogEdit = true;
+        this.snackbar = false;
+        this.$toast.success("Produto removido com sucesso!", {
+          position: "top-right",
+          timeout: 2000,
+        });
       } catch (error) {
         console.error(error);
       }
-    },
-
-    closeEdit() {
-      this.franchiseDTO = {
-        name: "",
-        description: "",
-        cnpj: "",
-      };
-
-      this.dialogEdit = false;
     },
 
     async toPush(id) {
